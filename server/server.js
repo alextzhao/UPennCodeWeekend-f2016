@@ -15,18 +15,12 @@ let server = app.listen(3000, () => {
 let io = require('socket.io')(server); //construct a server on port 3000
 
 
-
-
-
-
-
-
-
-
 // gets imports
 let Moniker = require('moniker');
 let _ = require('underscore');
 let User = require('./user');
+
+mongodb://<dbuser>:<dbpassword>@ds044699.mlab.com:44699/codeweekend2016
 
 
 //users array

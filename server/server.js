@@ -54,7 +54,7 @@ io.on('connection', (socket) => {
 
 	// handles MESG
 	socket.on('MESG', (data) => {
-		let user = user[socket.id];
+		let user = users[socket.id];
 		console.log(':MESG - $<user.getName()}> ${data.message}');
 		let message = {
 			from: user.getName(),

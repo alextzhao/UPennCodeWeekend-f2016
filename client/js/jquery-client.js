@@ -6,7 +6,7 @@ var nameColor = 'blue';
 var messagesAreHidden = false;
 
 var formatMessage = function(user, message) {
-	return '<span style="color: ' + nameColor + '">' + 
+	return '<span style="color: ' + nameColor + '">' +
 		user + '</span>' + ': ' + message;
 };
 
@@ -30,7 +30,8 @@ $(function() {
 
 		//fesrhjtfkdgrsfklrgekh
 		if($('#message').val() !== '') {
-			postMessage('black', formatMessage('Me', $('#message').val()));
+			//postMessage('black', formatMessage('Me', $('#message').val()));
+			sendMessage($('#message').val());
 			$('#message').val('');
 		}
 	});
@@ -73,5 +74,5 @@ $(function() {
 		$('h1').css('font-size', Math.sin(x) * 20);
 	}, 50);*/
 
-	
+
 });

@@ -1,20 +1,37 @@
 'use strict'; // puts us in strict mode (js in hard mode)
 
+/****************************************
+    Setting up the express app
+ *****************************************/
+let path = require('path');
+let express = require('express');
+let app = express();
+app.use(express.static(path.join(__dirname, '../client')));
+
+// start the server.
+let server = app.listen(3000, () => {
+    console.log('Express server listening on port 3000');
+})
+let io = require('socket.io')(server); //construct a server on port 3000
+
+
+
+
+
+
+
+
+
+
 // gets imports
 let Moniker = require('moniker');
 let _ = require('underscore');
 let User = require('./user');
 
+
 //users array
 let users = {};
 
-/* This sets up a pure socket-io server.
- * Later in the guide we upgrade to a full
- * express server, to serve files as well
- * as handle websockets */
-let Server = require('socket.io');
-let io = Server(3000); //construct a server on port 3000
-console.log('SocketIO listening on port 3000');
 
 
 // SOCKET HANDLER FUNCTIONS

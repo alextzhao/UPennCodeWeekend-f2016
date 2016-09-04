@@ -14,34 +14,58 @@ let server = app.listen(3000, () => {
 })
 let io = require('socket.io')(server); //construct a server on port 3000
 
+// This was the purely Socket.io server. We have upgraded to express app.
+// let Server = require('socket.io');   //label the import as "Server"
+// let io = Server(3000);   //construct a server on port 3000
+// console.log('SocketIO listening on port 3000');
 
+/*********************************************
+    Setting up the MongoDb Database
+ ********************************************/
+//linking mogo database
+let mongo = require('mongodb').MongoClient;
+let uri = "mongodb://divinquantx:091496Alex@ds044699.mlab.com:44699/codeweekend2016";
+
+/*********************************************/
 // gets imports
-let Moniker = require('moniker');
+let Moniker = require('moniker');   //help us generate random user names
 let _ = require('underscore');
-let User = require('./user');
+let User = require('./user');   //indicates look in curr folder, look for "user"
 
-mongodb://<dbuser>:<dbpassword>@ds044699.mlab.com:44699/codeweekend2016
-
-
-//users array
+//initializes the users dictionary
 let users = {};
 
-
-
-// SOCKET HANDLER FUNCTIONS
+/*********************************************
+    SOCKET HANDLER FUNCTIONS
+ **********************************************/
 io.on('connection', (socket) => {
     // on 'connection' we need to set some stuff up
     console.log('Got a new connection');
 
-	/** TOY EXAMPLE:
-     * Handles PING
-     * Responds with a PONG
-     */
+    //(ignore) TOY example that sends PING responds with PONG
     socket.on('PING', (data) => {
         console.log('Got a PING');
-
         socket.emit('PONG'); // reply with a PONG
     });
+
+    /******* Handles a new Connection to Mongo Database *********/
+
+    // open a connetion to the mongo database upon opening socket.
+    mongo.connect(uri, function(err, db) {
+        //replace the "codeweekend2016default" collection name with the name of the
+        //collection you created on mongolab
+        var collection = db.collection('codeweekend2016default')
+        collection.find().sort({
+            date: -1
+        }).limit(10).toArray((err, array) => {
+            if (err) return console.error(err);
+            for (let i = array.length - 1; i >= 0; i--) {
+                socket.emit('MESG', array[i]);
+            }
+        });
+    });
+
+    /******* Handles a new Chatter **********/
 
 	// Gets random name using helper function
 	// creates new user using random name
@@ -63,7 +87,8 @@ io.on('connection', (socket) => {
 	socket.broadcast.emit('JOINED', {user: users[socket.id].toObj()});
 
 
-	// handles MESG
+    /*********************    Handles MESG     **********************/
+
 	socket.on('MESG', (data) => {
 		let user = users[socket.id];
 		console.log(':MESG - $<user.getName()}> ${data.message}');
@@ -71,10 +96,28 @@ io.on('connection', (socket) => {
 			from: user.getName(),
 			message: data.message
 		};
+
+        // Adds new messages to mongo database
+        mongo.connect(uri, function(err, db) {
+            let collection = db.collection('codeweekend2016default');
+            collection.insert({
+                date: new Date().getTime(),
+                from: user.getName(),
+                message: data.message
+            }, function(err, o) {
+                if (err) {
+                    console.warn(err.message);
+                } else {
+                    console.log("chat message inserted into db: " + message);
+                }
+            });
+        });
+
+        //broadcast the message everywhere.
 		io.emit('MESG', message);
 	})
 
-	// handles a disconnet
+	/***********     handles a disconnet   ****************/
 	socket.on('disconnet', () => {
 		let user = users[socket.id];
 		console.log(':LEFT- ${user.toString()})');
@@ -85,12 +128,39 @@ io.on('connection', (socket) => {
 	})
 });
 
+    /************   handles a name change ****************/
+    socket.on('NAME', (data) +. {
+        let user = users[socket.id];
+        console.log(':NAME - <${user.getName()}> wants to change name to' +
+            '<${data.newName}>');
 
-// HELPER FUNCTIONS
+        if (isUniqueName(data.newName)) {
+            // successful name change
+            console.log(
+                ':NAME - <${user.getName()}> changed name to <${data.newName}>');
+            user.setName(data.newName);
+            io.emit('NAME', {
+                user: user.toObj()
+            });
+        } else {
+            // failure :(
+            console.log(':ERROR - NON_UNIQUE_NAME');
+            socket.emit('ERROR', {
+                message: 'NON_UNIQUE_NAME'
+            });
+        }
+    })
+
+/*********************************************
+    HELPER FUNCTIONS
+ **********************************************/
 /**
  * Sees if a name is unique
  * @param name The name to check
  * @return boolean true if the name is unique
+ *
+ * comment: seems like quite an inefficient algorithm. But for our purposes it
+ * works. But when there are millions of users this will generate duplicate work
  */
 function isUniqueName(name) {
     let names = _.mapObject(users, (user) => user.getName().toLowerCase());
@@ -106,6 +176,5 @@ function getUniqueName() {
     while (!isUniqueName(name)) {
         name = Moniker.choose();
     }
-
     return name;
 }

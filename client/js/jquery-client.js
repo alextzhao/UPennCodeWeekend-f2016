@@ -1,3 +1,4 @@
+//defining simple variables for future use.
 var infoColor = '#888888';
 var errorColor = 'red';
 var messageColor = '#000000';
@@ -24,18 +25,23 @@ $(function() {
 		.fadeIn(200);
 	}
 
-
 	$('#message-form').submit(function(event) {
+		//cancels default web browser form-submit behavior
 		event.preventDefault();
 
-		//fesrhjtfkdgrsfklrgekh
+		//Uncomment postMessage to support client side only.
+		//sendMessage sends the message through the server so everyone connected
+		//to the server can view the message.
 		if($('#message').val() !== '') {
 			//postMessage('black', formatMessage('Me', $('#message').val()));
+			//TODO: Where is the sendMessage Defined?
 			sendMessage($('#message').val());
 			$('#message').val('');
 		}
 	});
 
+	// select the submit-button and defines what happens when
+	// submit button is clicked.
 	$('#submit-button').click(function(event) {
 		$('#message-form').submit();
 	});
@@ -66,13 +72,4 @@ $(function() {
 		}
 
 	});
-
-	/*var x = 1;
-	setInterval(function() {
-		x = x + 0.1;
-		$('h1').css('margin-top', Math.sin(x) * 20);
-		$('h1').css('font-size', Math.sin(x) * 20);
-	}, 50);*/
-
-
 });

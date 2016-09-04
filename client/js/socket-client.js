@@ -1,4 +1,6 @@
 'use strict';
+
+// Uses Socket.io to connect to a server runnign on localhost
 var socket = io('http://localhost:3000');
 
 // stores user in channel. It's a dictionary with id as key
@@ -12,20 +14,31 @@ var users = {};
 // hence users[me] or users.me gives the client user
 var me = socket.id;
 
+// TOY PING PONG demonstration.
 socket.emit('PING');
-
 socket.on('PONG', function (data) {
   console.log('Got PONG!');
 });
 
 
-// handles MESG events
+/**************  handles MESG events   ***********************
+* For messages to the client.
+ * Data object:
+ *   - from    (the NAME of the user the message is from)
+ *   - message (the message)
+ */
 socket.on('MESG', function(data) {
     console.log(":MSG - <" + data.from + "> " + data.message);
 
     postMessage(messageColor, formatMessage(data.from, data.message));
 })
 
+/*************  handles STATE events  **************************
+*This is automatically fired up when a client first connects
+*data object contains:
+*  - users (list of user objects currently connected)
+*  - user (the id of the current client)
+*/
 socket.on('STATE', function (data) {
   users = data.users;
   me = data.user;
@@ -35,8 +48,8 @@ socket.on('STATE', function (data) {
               + ' these people are chatting: <br>' + getUserList());
 });
 
-/**
- * Handles JOINED events.
+
+/*************  Handles JOINED events.   **********************
  * When a new user joins.
  * Data object contains:
  *   - user (the user that just joined)
@@ -49,8 +62,7 @@ socket.on('JOINED', function (data) {
   postMessage(infoColor, user.name + ' just joined the channel!');
 });
 
-/**
- * Handles LEFT events.
+/********************   Handles LEFT events.  **********************
  * Deletes users who leave.
  * Data object:
  *   - user (the user that left)
@@ -63,9 +75,35 @@ socket.on('LEFT', function (data) {
   postMessage(infoColor, user.name + ' just left :(');
 });
 
-// ---------------
-//     HELPERS
-// ---------------
+/*********  handles NAME events *********************
+ * Updates a users name.
+ * Data object:
+ *   - user (the updated user object)
+ */
+socket.on('NAME', function (data) {
+  var user = data.user;
+  var old = users[user.id];
+  users[user.id] = user;
+
+  console.log(':NAME - <' + old.string + '> changed to <' + user.name + '>');
+
+  postMessage(infoColor,
+              '&lt;' + old.name + '&gt; changed their name to &lt;' + user.name + '&gt;');
+});
+
+/*************    Handles ERROR events. ********************
+ * Data object:
+ *   - message
+ */
+socket.on('ERROR', function (data) {
+  console.log(':ERROR - ' + data.message);
+
+  postMessage(errorColor, 'ERROR: ' + data.message);
+});
+
+/********************************
+     HELPERS
+/*******************************/
 
 /**
  * Showcases functional Javascript (_.fold) and ternary operators
@@ -77,12 +115,39 @@ function getUserList() {
                     return (rest ? rest + ', ' : '') + user.name;
                   },
                   ''
-                 );
+                );
 }
 
 /**
  * Sends a MESG to the server
  */
 function sendMessage(message) {
-  socket.emit('MESG', {message: message});
+  // check if it's a command
+  if (message.substring(0, 1) != '/') {
+      socket.emit('MESG', {
+          message: message
+      });
+  } else {
+      // it's a command!
+      let params = message.substring(1).split(' ');
+      let cmd = params[0];
+
+      sendCommand(cmd, params);
+}
+
+/**
+ * Handles commands
+ */
+function sendCommand(cmd, params) {
+  console.log('User attempted cmd ' + cmd);
+  console.log('Params: ' + params);
+
+  switch(cmd.toLowerCase()) {
+    case 'setname':
+      setName(params[1]);
+      break;
+
+    default:
+      postMessage(errorColor, 'ERROR: Invalid command "' + cmd + '"');
+  }
 }

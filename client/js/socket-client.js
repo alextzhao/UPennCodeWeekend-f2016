@@ -150,6 +150,22 @@ function sendCommand(cmd, params) {
         case 'image':
             sendImage(params[1]);
             break;
+        case 'giphy':
+            params.shift();
+            var term = params.join(' ');
+            console.log('Giphy request of: ' + term);
+            $.ajax({
+                method: "GET",
+                url: "giphy/json/" + term,
+            }).done(function(result) {
+                if (result.data.image_url == undefined) {
+                    postMessage(errorColor, 'ERROR: No results for giphy search of "' +
+                        term + '"');
+                } else {
+                    sendImage(result.data.image_url);
+                }
+            });
+            break;
         default:
             postMessage(errorColor, 'ERROR: Invalid command "' + cmd + '"');
     }

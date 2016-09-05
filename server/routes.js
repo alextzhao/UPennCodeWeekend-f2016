@@ -25,7 +25,6 @@ router.get('/giphy/:fmt/:search', (req, res) => {
                 error: err
             });
         }
-
         res.send(result);
     });
 });

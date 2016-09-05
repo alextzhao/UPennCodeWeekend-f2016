@@ -57,3 +57,7 @@ button:hover {
   opacity: 0.75;
   cursor: pointer;
 }
+
+code {
+  color: red;
+}

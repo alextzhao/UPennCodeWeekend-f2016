@@ -33,6 +33,32 @@ socket.on('MESG', function(data) {
     postMessage(messageColor, formatMessage(data.from, data.message));
 })
 
+/*********  handles NAME events *********************
+ * Updates a users name.
+ * Data object:
+ *   - user (the updated user object)
+ */
+socket.on('NAME', function (data) {
+  var user = data.user;
+  var old = users[user.id];
+  users[user.id] = user;
+
+  console.log(':NAME - <' + old.string + '> changed to <' + user.name + '>');
+
+  postMessage(infoColor,
+              '&lt;' + old.name + '&gt; changed their name to &lt;' + user.name + '&gt;');
+});
+
+/*************    Handles ERROR events. ********************
+ * Data object:
+ *   - message
+ */
+socket.on('ERROR', function (data) {
+  console.log(':ERROR - ' + data.message);
+
+  postMessage(errorColor, 'ERROR: ' + data.message);
+});
+
 /*************  handles STATE events  **************************
 *This is automatically fired up when a client first connects
 *data object contains:
@@ -75,32 +101,6 @@ socket.on('LEFT', function (data) {
   postMessage(infoColor, user.name + ' just left :(');
 });
 
-/*********  handles NAME events *********************
- * Updates a users name.
- * Data object:
- *   - user (the updated user object)
- */
-socket.on('NAME', function (data) {
-  var user = data.user;
-  var old = users[user.id];
-  users[user.id] = user;
-
-  console.log(':NAME - <' + old.string + '> changed to <' + user.name + '>');
-
-  postMessage(infoColor,
-              '&lt;' + old.name + '&gt; changed their name to &lt;' + user.name + '&gt;');
-});
-
-/*************    Handles ERROR events. ********************
- * Data object:
- *   - message
- */
-socket.on('ERROR', function (data) {
-  console.log(':ERROR - ' + data.message);
-
-  postMessage(errorColor, 'ERROR: ' + data.message);
-});
-
 /********************************
      HELPERS
 /*******************************/
@@ -122,32 +122,52 @@ function getUserList() {
  * Sends a MESG to the server
  */
 function sendMessage(message) {
-  // check if it's a command
-  if (message.substring(0, 1) != '/') {
-      socket.emit('MESG', {
-          message: message
-      });
-  } else {
-      // it's a command!
-      let params = message.substring(1).split(' ');
-      let cmd = params[0];
+    // check if it's a command
+    if (message.substring(0, 1) != '/') {
+        socket.emit('MESG', {
+            message: message
+        });
+    } else {
+        // it's a command!
+        let params = message.substring(1).split(' ');
+        let cmd = params[0];
 
-      sendCommand(cmd, params);
+        sendCommand(cmd, params);
+    }
 }
 
 /**
  * Handles commands
  */
 function sendCommand(cmd, params) {
-  console.log('User attempted cmd ' + cmd);
-  console.log('Params: ' + params);
+    console.log('User attempted cmd ' + cmd);
+    console.log('Params: ' + params);
 
-  switch(cmd.toLowerCase()) {
-    case 'setname':
-      setName(params[1]);
-      break;
+    switch (cmd.toLowerCase()) {
+        case 'setname':
+            setName(params[1]);
+            break;
+        case 'image':
+            sendImage(params[1]);
+            break;
+        default:
+            postMessage(errorColor, 'ERROR: Invalid command "' + cmd + '"');
+    }
+}
 
-    default:
-      postMessage(errorColor, 'ERROR: Invalid command "' + cmd + '"');
-  }
+/**
+ * Sends a NAME message to the server
+ * changing this users name. The server side code will handle the rest
+ */
+function setName(newName) {
+    socket.emit('NAME', {
+        newName: newName
+    });
+}
+
+/**
+ * Serves an image
+ */
+function sendImage(imgUrl) {
+  socket.emit('IMG', {url: imgUrl});
 }

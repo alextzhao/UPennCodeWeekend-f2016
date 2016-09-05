@@ -5,10 +5,33 @@
  *****************************************/
 let path = require('path');
 let express = require('express');
-let app = express();
+let app = express();    //initialize express
 app.use(express.static(path.join(__dirname, '../client')));
 
-// start the server.
+// integrate views, for use with error 404 page.
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hjs');
+
+//routes
+let routes = require('./routes');
+//uses "/" as route. Since we only have one route it makes sense
+app.use('/', routes);
+
+// 404
+app.use((req, res, next) => {
+    let err = new Error('Not found');
+    err.status = 404;
+    next(err);
+});
+app.use((err, req, res, next) => {
+    res.status(err.status || 500);
+    res.render('error', {
+        errorMessage: err.message,
+        error: err
+    });
+});
+
+// start the server on port 3000
 let server = app.listen(3000, () => {
     console.log('Express server listening on port 3000');
 })
@@ -115,21 +138,15 @@ io.on('connection', (socket) => {
 
         //broadcast the message everywhere.
 		io.emit('MESG', message);
-	})
+	});
 
-	/***********     handles a disconnet   ****************/
-	socket.on('disconnet', () => {
-		let user = users[socket.id];
-		console.log(':LEFT- ${user.toString()})');
-		//alternatively can use io.emit. Broadcasts LEFT event to everyone
-		//so everyone can update their own user lists.
-		socket.broadcast.emit('LEFT', {user: user.toObj()});
-		delete users[socket.id];
-	})
-});
-
-    /************   handles a name change ****************/
-    socket.on('NAME', (data) +. {
+    /************   handles a name change ****************
+  * Handles NAME
+  * When a client tries to change their name
+  * Data object contains:
+  *   - newName
+  */
+    socket.on('NAME', (data) => {
         let user = users[socket.id];
         console.log(':NAME - <${user.getName()}> wants to change name to' +
             '<${data.newName}>');
@@ -149,7 +166,35 @@ io.on('connection', (socket) => {
                 message: 'NON_UNIQUE_NAME'
             });
         }
-    })
+    });
+
+/********   Sends an image (specified by a url) to all clients  ********
+ * Data object contains:
+ *   - url
+ */
+socket.on('IMG', (data) => {
+    let user = users[socket.id];
+    console.log(`:IMG - <${user.getName()}> IMAGE @ ${data.url}`);
+
+    let message = {
+        from: user.getName(),
+        message: `<img src="${data.url}" class="message-image">`
+    };
+
+    io.emit('MESG', message);
+});
+
+	/***********     handles a disconnet   ****************/
+	socket.on('disconnet', () => {
+		let user = users[socket.id];
+		console.log(':LEFT- ${user.toString()})');
+		//alternatively can use io.emit. Broadcasts LEFT event to everyone
+		//so everyone can update their own user lists.
+		socket.broadcast.emit('LEFT', {user: user.toObj()});
+		delete users[socket.id];
+	});
+});
+
 
 /*********************************************
     HELPER FUNCTIONS

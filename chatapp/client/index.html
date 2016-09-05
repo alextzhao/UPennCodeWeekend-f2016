@@ -1,0 +1,71 @@
+<!-- This is a slightly more complete HTML document, but with no styles as yet. -->
+<!-- This, by the way, is a comment that does not affect any of the code we write.
+We can use this to leave notes in the code for our future selves,
+or for others reading our code -->
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="Code Weekend f2016 Chat Server">
+        <title>Code Weekend f2016 Chat Server</title>
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/script.js"></script>
+
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+        <script src="js/jquery-client.js"></script>
+
+        <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+        <script src="http://underscorejs.org/underscore-min.js"></script>
+        <script src="js/socket-client.js"></script>
+    </head>
+
+    <body>
+        <h1>Code Weekend f2016 Chat Server</h1>
+        <h2>Welcome to the f2016 Chat Server</h2>
+        <!-- Here's a comment that will not show up on the actual page -->
+        <p class="red-text" id="intro-para">
+            By participating in this chat room, you are acknolwedging the existence
+            of aliens, and also acknowledgeing that you are a human agent and
+            not an AI agent part of Skynet.
+        </p>
+        <p>
+            Here, try it out. Some tips:
+            <ul>
+                <li>
+                    Use the command <code>/setName "newName"</code> to change your
+                    name to <code>newName</code>.
+                </li>
+                <li>
+                    Use the command <code>/image "imageUrl"</code>to send image
+                </li>
+                <li>
+                    Use the command <code>/giphy "searchTerm"</code> to send a gif!
+                </li>
+
+            </ul>
+
+        </p>
+
+        <h3> Messages </h3>
+        <p>
+            Here's a list of all the messages so far:
+        </p>
+        <ul class="messages"></ul>
+
+        <!--Also see @jquery-client: here is where we append the messages -->
+        <ul id="messages"></ul>
+
+
+        <form id="message-form" action="#">
+            <textarea id="message" placeholder="Write your message here..." required></textarea>
+        </form>
+
+        <button id="submit-button">Send Message</button>
+        <button id="clear-button">Clear!</button>
+        <button id="toggle-hide">Hide messages</button>
+    </body>
+
+</html>

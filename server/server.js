@@ -78,6 +78,7 @@ io.on('connection', (socket) => {
         //replace the "codeweekend2016default" collection name with the name of the
         //collection you created on mongolab
         var collection = db.collection('codeweekend2016default')
+        //return the 10 most recent messages, in sorted order.
         collection.find().sort({
             date: -1
         }).limit(10).toArray((err, array) => {

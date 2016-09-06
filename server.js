@@ -6,7 +6,7 @@
 let path = require('path');
 let express = require('express')();
 let app = express();    //initialize express
-app.use(express.static(path.join(__dirname, './client')));
+app.use(express.static(path.join(__dirname, 'client')));
 
 // integrate views, for use with error 404 page.
 app.set('views', path.join(__dirname, 'views'));

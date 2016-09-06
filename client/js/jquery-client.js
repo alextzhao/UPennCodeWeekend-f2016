@@ -13,7 +13,7 @@ var formatMessage = function(user, message) {
 
 var postMessage = function(color, contents) {
 	console.log("jquery is not ready yet");
-}
+};
 
 
 $(function() {
@@ -23,7 +23,7 @@ $(function() {
 		.hide()
 		.appendTo('#messages')
 		.fadeIn(200);
-	}
+	};
 
 	$('#message-form').submit(function(event) {
 		//cancels default web browser form-submit behavior
@@ -60,7 +60,7 @@ $(function() {
 			messagesAreHidden = true;
 			$('#toggle-hide').text('Show messages');
 		}
-	})
+	});
 
 
 	$('body').keypress(function(event) {

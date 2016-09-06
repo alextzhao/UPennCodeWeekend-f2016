@@ -1,4 +1,3 @@
-'use strict';
 
 // Uses Socket.io to connect to a server runnign on localhost
 var socket = io('http://localhost:3000');
@@ -31,7 +30,7 @@ socket.on('MESG', function(data) {
     console.log(":MSG - <" + data.from + "> " + data.message);
 
     postMessage(messageColor, formatMessage(data.from, data.message));
-})
+});
 
 /*********  handles NAME events *********************
  * Updates a users name.
@@ -158,7 +157,7 @@ function sendCommand(cmd, params) {
                 method: "GET",
                 url: "giphy/json/" + term,
             }).done(function(result) {
-                if (result.data.image_url == undefined) {
+                if (result.data.image_url === undefined) {
                     postMessage(errorColor, 'ERROR: No results for giphy search of "' +
                         term + '"');
                 } else {

@@ -1,7 +1,8 @@
 'use strict';
 
 // Uses Socket.io to connect to a server runnign on localhost
-var socket = io('http://localhost:3000');
+//var socket = io('http://localhost:3000');   //TODO: Do we need to change this for it to run over the internet as well?
+var socket = io();
 
 // stores user in channel. It's a dictionary with id as key
 // User objects have these fields

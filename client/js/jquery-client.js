@@ -70,6 +70,5 @@ $(function() {
 			$('#message-form').submit();
 			event.preventDefault();
 		}
-
 	});
 });
